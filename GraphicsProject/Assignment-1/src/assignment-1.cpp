@@ -301,11 +301,65 @@ std::vector<glm::vec3> GenerateLinePixels(int x1, int y1, int x2, int y2)
         pixels = linerasterizer.AllFragments();
     }
     else {
-        glm::vec3 startpoint = glm::vec3(float(x1), float(y1), 0.0f);
-        pixels.push_back(startpoint);
+        // glm::vec3 startpoint = glm::vec3(float(x1), float(y1), 0.0f);
+        // pixels.push_back(startpoint);
         
-        glm::vec3 endpoint = glm::vec3(float(x2), float(y2), 0.0f);
-        pixels.push_back(endpoint);
+        // glm::vec3 endpoint = glm::vec3(float(x2), float(y2), 0.0f);
+        // pixels.push_back(endpoint);
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+
+        int abs_2dx = std::abs(dx) << 1; // 2 * |dx|
+        int abs_2dy = std::abs(dy) << 1; // 2 * |dy|
+
+        int x_step = (dx < 0) ?-1 : 1;
+        int y_step = (dy < 0) ?-1 : 1;
+
+        bool x_dominant = abs_2dx > abs_2dy;
+       
+        int x_current = x1;
+        int y_current = y1;
+
+        if (x1 != x2 || y1 != y2)
+        {
+            pixels.push_back(glm::vec3(float(x_current), float(y_current), 0.0f));
+            if (abs_2dx > abs_2dy) {
+            // The line is x-dominant
+                // std::cout << "x-dominant" << std::endl;
+                bool left_right = x_step > 0;
+                int d = abs_2dy - (abs_2dx >> 1);
+                do
+                {
+                    if (d > 0 || d == 0 && left_right) {
+                        y_current += y_step;
+                        d         -= abs_2dx;
+                    }
+                    x_current += x_step;
+                    d         += abs_2dy;
+
+                    pixels.push_back(glm::vec3(float(x_current), float(y_current), 0.0f));
+                } 
+                while (x_current != x2);
+            }
+            else {
+            // The line is y-dominant
+                // std::cout << "y-dominant" << std::endl;
+                bool left_right = y_step > 0;
+                int d = abs_2dx - (abs_2dy >> 1);
+                do
+                {
+                    if (d > 0 || d == 0 && left_right) {
+                        x_current += x_step;
+                        d         -= abs_2dy;
+                    }
+                    y_current += y_step;
+                    d         += abs_2dx;
+
+                    pixels.push_back(glm::vec3(float(x_current), float(y_current), 0.0f));
+                } 
+                while (y_current != y2);
+            }
+        }
     }
     return pixels;
 }
@@ -797,7 +851,7 @@ int main()
 
                     glUseProgram(dotshaderID);
                     glUniform1f(dotvertexscale, 0.1f);
-                    glUniform1f(dotvertexpointsize, 2.0f * PointSize);
+                    glUniform1f(dotvertexpointsize, 1.0f * PointSize); //DOT SIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // glUniform1f(dotvertexpointsize, PointSize);
                     glUniform3f(dotfragmentcolor, 0.0f, 0.0f, 0.0f);
           

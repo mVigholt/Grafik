@@ -851,8 +851,8 @@ int main()
 
                     glUseProgram(dotshaderID);
                     glUniform1f(dotvertexscale, 0.1f);
-                    glUniform1f(dotvertexpointsize, 1.0f * PointSize); //DOT SIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // glUniform1f(dotvertexpointsize, PointSize);
+                    glUniform1f(dotvertexpointsize, 1.0f * PointSize); //DOT SIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     glUniform3f(dotfragmentcolor, 0.0f, 0.0f, 0.0f);
           
                     glBindVertexArray(PixelVertexArrayID);

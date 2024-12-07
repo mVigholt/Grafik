@@ -152,7 +152,8 @@ bool edge_rasterizer::init_edge(int x1, int y1, int x2, int y2)
     this->y_current = this->y_start;
     int dx = this->x_stop- this->x_start;
     int dy = this->y_stop- this->y_start;
-    this->x_step = (dx < 0) ?-1 : 1; this->y_step = 1;
+    this->x_step = (dx < 0) ?-1 : 1; 
+    this->y_step = 1;
     this->Numerator = std::abs(dx); // Numerator = |dx|
     this->Denominator = std::abs(dy); // Assumption: dy > 0
     this->Accumulator = (x_step > 0) ? Denominator : 1;

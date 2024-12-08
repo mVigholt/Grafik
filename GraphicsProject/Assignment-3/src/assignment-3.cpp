@@ -130,7 +130,7 @@ void KeyboardCallback(GLFWwindow* Window, int key, int scancode, int action, int
             glfwSetWindowShouldClose(Window, GL_TRUE);
         }
         else {
-            switch (key) {
+            switch (key) {//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 case '1':
                     NFigure = 0;
                     break;
@@ -157,7 +157,7 @@ void KeyboardCallback(GLFWwindow* Window, int key, int scancode, int action, int
 
 int main() 
 {
-    try {
+    try {//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         Camera camera[5];
         camera[0] = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
                            glm::vec3(8.0f, 6.0f, 84.0f),
@@ -245,7 +245,7 @@ int main()
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 glUseProgram(lineshaderID);
-                if (NFigure < 5) {
+                if (NFigure < 5) {//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     glm::mat4x4 CTM = camera[NFigure].CurrentTransformationMatrix();
                     glUniformMatrix4fv(housevertextransform, 1, GL_FALSE, &CTM[0][0]);
                     glUniform3f(housefragmentcolor, housecolor.r, housecolor.g, housecolor.b);

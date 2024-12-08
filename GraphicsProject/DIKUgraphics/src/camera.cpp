@@ -240,9 +240,11 @@ glm::mat4x4 Camera::InvCurrentTransformationMatrix()
 
     // std::cout << "Camera::InvCurrentTransformationMatrix(): Not implemented yet!" << std::endl;
 
-    this->invcurrenttransformationmatrix = this->invvieworientationmatrix *
-                                           this->invviewprojectionmatrix *
-                                           this->invwindowviewportmatrix;
+    // this->invcurrenttransformationmatrix = this->invvieworientationmatrix *
+    //                                        this->invviewprojectionmatrix *
+    //                                        this->invwindowviewportmatrix;
+    
+    this->invcurrenttransformationmatrix = glm::inverse(this->currenttransformationmatrix);                                      glm::inverse(this->currenttransformationmatrix);
     
     return this->invcurrenttransformationmatrix;
 }
@@ -486,10 +488,11 @@ void Camera::ComputeViewOrientation(glm::vec3& vrp, glm::vec3& vpn, glm::vec3& v
     // Normalize vpn and vup
     glm::vec3 n = glm::normalize(vpn);
     glm::vec3 u = glm::normalize(glm::cross(vup, n));
-    glm::vec3 v = glm::cross(n, u);
+    glm::vec3 v = glm::normalize(glm::cross(n, u));
     R[0] = glm::vec4(u, 0.0f);
     R[1] = glm::vec4(v, 0.0f);
     R[2] = glm::vec4(n, 0.0f);
+    R = glm::transpose(R);
 
     // Compute the View Orientation matrix
     this->vieworientationmatrix = R * T_vrp;
@@ -542,21 +545,38 @@ void Camera::ComputeViewProjection(glm::vec3& prp,
     glm::mat4 Sh_per = glm::mat4(1.0f);
     glm::vec3 CW = glm::vec3((Umax+Umin)/2, (Vmax+Vmin)/2, 0.0f);
     glm::vec3 DOP = prp - CW;
-    float shx = - DOP.x/DOP.z;
-    float shy = - DOP.y/DOP.z;
-    Sh_per[2] = glm::vec4(shx, shy, 1.0f, 0.0f);
+    // float shx = - DOP.x/DOP.z;
+    // float shy = - DOP.y/DOP.z;
+    // Sh_per[2] = glm::vec4(shx, shy, 1.0f, 0.0f);
+    Sh_per[2][0] = -DOP.x/DOP.z;
+    Sh_per[2][1] = -DOP.y/DOP.z;
 
     // Construct the scaleing matrix S_per
     glm::mat4 S_per(1.0f);
-    float Sx = -prp.z /((Umax-Umin)*(B-prp.z));
-    float Sy = -prp.z /((Vmax-Vmin)*(B-prp.z));
+    float Sx = -2*prp.z /((Umax-Umin)*(B-prp.z));
+    float Sy = -2*prp.z /((Vmax-Vmin)*(B-prp.z));
     float Sz = -1 /(B-prp.z);
     S_per[0][0] = Sx;
     S_per[1][1] = Sy;
     S_per[2][2] = Sz;
 
+    // Construct the Transformation of View Volumes matrix M_perpar
+    glm::mat4 M_perpar = glm::mat4(1.0f);
+    float Z_max = (F-prp.z) / (B-prp.z);
+    M_perpar[2][2] = 1.0f / (1.0f + Z_max);
+    M_perpar[2][3] = -1.0f;
+    M_perpar[3][2] = (Z_max) / (1 + Z_max); //according to slides, which is wrong!: (-Z_max) / (1 + Z_max);
+    M_perpar[3][3] = 0.0f;
+
+    glm::mat4 M_wv = glm::mat4(1.0f);
+    // glm::mat4 T = glm::translate(glm::vec3(1.0f, 1.0f, 0.0f));
+    // glm::mat4 S = glm::scale(glm::vec3(Umax-Umin / 2.0f, Vmax-Vmin / 2.0f, 1.0f));
+    // M_wv = S * T;
+    
+    // M_pertotal = M_wv * M_perpar * S_per * Sh_per * T_prp * R * T_vrp
+
     // Combine to get the View Projection matrix
-    this->viewprojectionmatrix = S_per * Sh_per * T_prp;
+    this->viewprojectionmatrix = M_wv * M_perpar * S_per * Sh_per * T_prp;
     this->invviewprojectionmatrix = glm::inverse(this->viewprojectionmatrix);
 
     // std::cout << "T(-PRP):" << std::endl;
@@ -577,6 +597,13 @@ void Camera::ComputeViewProjection(glm::vec3& prp,
     // for (int row = 0; row < 4; ++row) {
     //     for (int col = 0; col < 4; ++col) {
     //         std::cout << S_per[col][row] << " ";
+    //     }
+    //     std::cout << std::endl; // Newline for each row
+    // }
+    // std::cout << "M_perpar:" << std::endl;
+    // for (int row = 0; row < 4; ++row) {
+    //     for (int col = 0; col < 4; ++col) {
+    //         std::cout << M_perpar[col][row] << " ";
     //     }
     //     std::cout << std::endl; // Newline for each row
     // }

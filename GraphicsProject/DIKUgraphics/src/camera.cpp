@@ -1,5 +1,15 @@
 #include "camera.h"
 
+void print4x4Matrix(std::string s,glm::mat4 m){
+    std::cout << s << std::endl;
+    for (int row = 0; row < 4; ++row) {
+        for (int col = 0; col < 4; ++col) {
+            std::cout << m[col][row] << " ";
+        }
+        std::cout << std::endl; // Newline for each row
+    }
+}
+
 /*
  * Default constructor, creates a camera with default values of the defining parameters.
  */
@@ -219,6 +229,7 @@ glm::mat4x4 Camera::CurrentTransformationMatrix()
 {
     // std::cout << "Camera::CurrentTransformationMatrix(): Not implemented yet!" << std::endl;
 
+    // M_pertotal = M_wv * M_perpar * S_per * Sh_per * T_prp * R * T_vrp
     this->currenttransformationmatrix = this->windowviewportmatrix *
                                         this->viewprojectionmatrix *
                                         this->vieworientationmatrix;
@@ -243,7 +254,6 @@ glm::mat4x4 Camera::InvCurrentTransformationMatrix()
     // this->invcurrenttransformationmatrix = this->invvieworientationmatrix *
     //                                        this->invviewprojectionmatrix *
     //                                        this->invwindowviewportmatrix;
-    
     this->invcurrenttransformationmatrix = glm::inverse(this->currenttransformationmatrix);                                      glm::inverse(this->currenttransformationmatrix);
     
     return this->invcurrenttransformationmatrix;
@@ -498,20 +508,8 @@ void Camera::ComputeViewOrientation(glm::vec3& vrp, glm::vec3& vpn, glm::vec3& v
     this->vieworientationmatrix = R * T_vrp;
     this->invvieworientationmatrix = glm::inverse(this->vieworientationmatrix);
 
-    // std::cout << "R:" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << R[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
-    // std::cout << " T(-VRP):" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << T_vrp[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
+    // print4x4Matrix("T_vrp", T_vrp);
+    // print4x4Matrix("R", R);
 }
 
 /*
@@ -545,11 +543,10 @@ void Camera::ComputeViewProjection(glm::vec3& prp,
     glm::mat4 Sh_per = glm::mat4(1.0f);
     glm::vec3 CW = glm::vec3((Umax+Umin)/2, (Vmax+Vmin)/2, 0.0f);
     glm::vec3 DOP = prp - CW;
-    // float shx = - DOP.x/DOP.z;
-    // float shy = - DOP.y/DOP.z;
-    // Sh_per[2] = glm::vec4(shx, shy, 1.0f, 0.0f);
-    Sh_per[2][0] = -DOP.x/DOP.z;
-    Sh_per[2][1] = -DOP.y/DOP.z;
+    float shx = -DOP.x/DOP.z;
+    float shy = -DOP.y/DOP.z;
+    Sh_per[2][0] = shx;
+    Sh_per[2][1] = shy;
 
     // Construct the scaleing matrix S_per
     glm::mat4 S_per(1.0f);
@@ -562,51 +559,20 @@ void Camera::ComputeViewProjection(glm::vec3& prp,
 
     // Construct the Transformation of View Volumes matrix M_perpar
     glm::mat4 M_perpar = glm::mat4(1.0f);
-    float Z_max = (F-prp.z) / (B-prp.z);
+    float Z_max = -(F-prp.z) / (B-prp.z);
     M_perpar[2][2] = 1.0f / (1.0f + Z_max);
     M_perpar[2][3] = -1.0f;
-    M_perpar[3][2] = (Z_max) / (1 + Z_max); //according to slides, which is wrong!: (-Z_max) / (1 + Z_max);
+    M_perpar[3][2] = (-Z_max) / (1 + Z_max);
     M_perpar[3][3] = 0.0f;
 
-    glm::mat4 M_wv = glm::mat4(1.0f);
-    // glm::mat4 T = glm::translate(glm::vec3(1.0f, 1.0f, 0.0f));
-    // glm::mat4 S = glm::scale(glm::vec3(Umax-Umin / 2.0f, Vmax-Vmin / 2.0f, 1.0f));
-    // M_wv = S * T;
-    
-    // M_pertotal = M_wv * M_perpar * S_per * Sh_per * T_prp * R * T_vrp
-
     // Combine to get the View Projection matrix
-    this->viewprojectionmatrix = M_wv * M_perpar * S_per * Sh_per * T_prp;
+    this->viewprojectionmatrix = M_perpar * S_per * Sh_per * T_prp;
     this->invviewprojectionmatrix = glm::inverse(this->viewprojectionmatrix);
 
-    // std::cout << "T(-PRP):" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << T_prp[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
-    // std::cout << "Sh_per:" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << Sh_per[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
-    // std::cout << "S_per:" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << S_per[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
-    // std::cout << "M_perpar:" << std::endl;
-    // for (int row = 0; row < 4; ++row) {
-    //     for (int col = 0; col < 4; ++col) {
-    //         std::cout << M_perpar[col][row] << " ";
-    //     }
-    //     std::cout << std::endl; // Newline for each row
-    // }
+    // print4x4Matrix("T_prp", T_prp);
+    // print4x4Matrix("Sh_per", Sh_per);
+    // print4x4Matrix("S_per", S_per);
+    // print4x4Matrix("M_perpar", M_perpar);
 }
 
 /*

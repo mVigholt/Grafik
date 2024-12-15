@@ -496,9 +496,12 @@ void Camera::ComputeViewOrientation(glm::vec3& vrp, glm::vec3& vpn, glm::vec3& v
     // Construct the rotation matrix R
     glm::mat4 R(1.0f);
     // Normalize vpn and vup
+    // glm::vec3 n = glm::normalize(vpn);
+    // glm::vec3 u = glm::normalize(glm::cross(vup, n));
+    // glm::vec3 v = glm::normalize(glm::cross(n, u));
+    glm::vec3 v = glm::normalize(vup);
     glm::vec3 n = glm::normalize(vpn);
-    glm::vec3 u = glm::normalize(glm::cross(vup, n));
-    glm::vec3 v = glm::normalize(glm::cross(n, u));
+    glm::vec3 u = glm::normalize(glm::cross(v, n));
     R[0] = glm::vec4(u, 0.0f);
     R[1] = glm::vec4(v, 0.0f);
     R[2] = glm::vec4(n, 0.0f);
@@ -559,7 +562,7 @@ void Camera::ComputeViewProjection(glm::vec3& prp,
 
     // Construct the Transformation of View Volumes matrix M_perpar
     glm::mat4 M_perpar = glm::mat4(1.0f);
-    float Z_max = -(F-prp.z) / (B-prp.z);
+    float Z_max = -(F-prp.z) / (B-prp.z); //= new front clipping plane, Z_min = new back clipping plane
     M_perpar[2][2] = 1.0f / (1.0f + Z_max);
     M_perpar[2][3] = -1.0f;
     M_perpar[3][2] = (-Z_max) / (1 + Z_max);

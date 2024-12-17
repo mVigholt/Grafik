@@ -1,20 +1,20 @@
 #version 330 core
 
 uniform vec3 AmbientLightColor; // Ambient light intensity
-uniform vec3 LightPosition;    // Position of the light source
-uniform vec3 LightColor;       // Intensity/color of the light source
+uniform vec3 LightPosition;     // Position of the light source
+uniform vec3 LightColor;        // Intensity/color of the light source
 
-uniform vec3 EyePosition;      // Position of the camera/eye
+uniform vec3 EyePosition;       // Position of the camera/eye
 
-uniform vec3 AmbientColor;     // Material ambient color
-uniform vec3 DiffuseColor;     // Material diffuse color
-uniform vec3 SpecularColor;    // Material specular color
-uniform float Shininess;       // Material shininess coefficient
+uniform vec3 AmbientColor;      // Material ambient color
+uniform vec3 DiffuseColor;      // Material diffuse color
+uniform vec3 SpecularColor;     // Material specular color
+uniform float Shininess;        // Material shininess coefficient
 
-in vec3 WorldVertex;           // Position of the fragment in world space
-in vec3 WorldNormal;           // Normal at the fragment in world space
+in vec3 WorldVertex;            // Position of the fragment in world space
+in vec3 WorldNormal;            // Normal at the fragment in world space
 
-out vec4 FragColor;            // Final output color
+out vec4 FragColor;             // Final output color
 
 void main() {
     vec3 color = vec3(0.0f, 0.0f, 0.0f);

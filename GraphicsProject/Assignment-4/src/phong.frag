@@ -31,7 +31,7 @@ void main() {
     vec3 V = normalize(EyePosition - WorldVertex);
     
     // Compute the reflection vector
-    vec3 R = reflect(-L, N);
+    vec3 R = normalize(2.0f * dot(N,L) * N - L); //reflect(-L, N);
     
     //----------------------------------------------------------------------------
     // Compute the ambient contribution
@@ -39,8 +39,8 @@ void main() {
     
     //----------------------------------------------------------------------------
     // Compute the diffuse contribution (Lambert's cosine law)
-    float diff = max(dot(N, L), 0.0);
-    vec3 diffuse = LightColor * DiffuseColor * diff;
+    float cost = max(dot(N, L), 0.0);
+    vec3 diffuse = LightColor * DiffuseColor * cost;
     
     //----------------------------------------------------------------------------
     // Compute the specular contribution (Phong reflection model)

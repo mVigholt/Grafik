@@ -324,8 +324,73 @@ void ParametricSurface::SampleSurface()
 {
     Trace("ParametricSurface", "SampleSurface()");
 
-    std::cout << "ParametricSurface::SampleSurface(): Not implemented yet!" << std::endl;
+    // std::cout << "ParametricSurface::SampleSurface(): Not implemented yet!" << std::endl;
+
+    // this->validdata = true;
     
+    glm::vec3 V1;
+    glm::vec3 V2;
+    glm::vec3 V3;
+    glm::vec3 V4;
+
+    glm::vec3 N1;
+    glm::vec3 N2;
+    glm::vec3 N3;
+    glm::vec3 N4;
+
+    float du = (this->umax - this->umin) / this->N;
+    float u0 = this->umin;
+    float dv = (this->vmax - this->vmin) / this->M;
+    float v0 = this->vmin;
+    float ui;
+    float vj;
+
+    for (int i = 0; i < this->N; i++) {
+        for (int j = 0; j < this->M; j++) {
+            ui = u0+du*i;
+            vj = v0+dv*j;
+
+            V1 = Vertex(ui, vj);
+            N1 = Normal(ui, vj);
+            V2 = Vertex(ui + du, vj);
+            N2 = Normal(ui + du, vj);
+            V3 = Vertex(ui + du, vj + dv);
+            N3 = Normal(ui + du, vj + dv);
+            V4 = Vertex(ui, vj + dv);
+            N4 = Normal(ui, vj + dv);
+                
+            if (this->frontfacing) {
+                this->vertices.push_back(V1);
+                this->normals.push_back(N1);
+                this->vertices.push_back(V3);  
+                this->normals.push_back(N3);
+                this->vertices.push_back(V4);
+                this->normals.push_back(N4);
+
+                this->vertices.push_back(V3);
+                this->normals.push_back(N3);
+                this->vertices.push_back(V1);
+                this->normals.push_back(N1); 
+                this->vertices.push_back(V2);
+                this->normals.push_back(N2);
+            } else {
+                this->vertices.push_back(V1);
+                this->normals.push_back(-N1);
+                this->vertices.push_back(V4);
+                this->normals.push_back(-N4);
+                this->vertices.push_back(V3);  
+                this->normals.push_back(-N3);
+
+                this->vertices.push_back(V3);
+                this->normals.push_back(-N3); 
+                this->vertices.push_back(V2);
+                this->normals.push_back(-N2);
+                this->vertices.push_back(V1);
+                this->normals.push_back(-N1);
+            }  
+        }
+    }
+
     this->validdata = true;
 }
 

@@ -230,9 +230,7 @@ glm::mat4x4 Camera::CurrentTransformationMatrix()
     // std::cout << "Camera::CurrentTransformationMatrix(): Not implemented yet!" << std::endl;
 
     // M_pertotal = M_wv * M_perpar * S_per * Sh_per * T_prp * R * T_vrp
-    this->currenttransformationmatrix = this->windowviewportmatrix *
-                                        this->viewprojectionmatrix *
-                                        this->vieworientationmatrix;
+    this->currenttransformationmatrix = WindowViewport() * ViewProjection() * ViewOrientation();
     
     return this->currenttransformationmatrix;
 }
@@ -250,11 +248,8 @@ glm::mat4x4 Camera::InvCurrentTransformationMatrix()
     TraceMessage("InvWindowViewport() = " << std::endl << this->invwindowviewportmatrix << std::endl;);
 
     // std::cout << "Camera::InvCurrentTransformationMatrix(): Not implemented yet!" << std::endl;
-
-    // this->invcurrenttransformationmatrix = this->invvieworientationmatrix *
-    //                                        this->invviewprojectionmatrix *
-    //                                        this->invwindowviewportmatrix;
-    this->invcurrenttransformationmatrix = glm::inverse(this->currenttransformationmatrix);                                      glm::inverse(this->currenttransformationmatrix);
+    
+    this->invcurrenttransformationmatrix = InvViewOrientation() * InvViewProjection() * InvWindowViewport();
     
     return this->invcurrenttransformationmatrix;
 }
@@ -491,17 +486,15 @@ void Camera::ComputeViewOrientation(glm::vec3& vrp, glm::vec3& vpn, glm::vec3& v
     // std::cout << " Camera::ComputeViewOrientation(vec3&, vec3&, vec3&): Not implemented yet!" << std::endl;
 
     // Construct the translation matrix T(-VRP)
-    glm::mat4 T_vrp = glm::translate(glm::mat4(1.0f), -vrp);
+    glm::mat4 T_vrp = glm::translate(-vrp);//glm::mat4 T_vrp = glm::translate(glm::mat4(1.0f), -vrp);
     
     // Construct the rotation matrix R
     glm::mat4 R(1.0f);
     // Normalize vpn and vup
-    // glm::vec3 n = glm::normalize(vpn);
-    // glm::vec3 u = glm::normalize(glm::cross(vup, n));
-    // glm::vec3 v = glm::normalize(glm::cross(n, u));
-    glm::vec3 v = glm::normalize(vup);
     glm::vec3 n = glm::normalize(vpn);
-    glm::vec3 u = glm::normalize(glm::cross(v, n));
+    glm::vec3 u = glm::normalize(glm::cross(vup, n));
+    glm::vec3 v = glm::normalize(glm::cross(n, u));
+    
     R[0] = glm::vec4(u, 0.0f);
     R[1] = glm::vec4(v, 0.0f);
     R[2] = glm::vec4(n, 0.0f);

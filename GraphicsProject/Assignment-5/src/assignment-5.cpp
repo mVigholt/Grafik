@@ -19,6 +19,10 @@
 #include "bezierpatch.h"
 #include "shader_path.h"
 
+#include <chrono>
+#include <ctime>
+#include <conio.h>
+#include <iostream> 
 
 
 // Parameters for the different sampling methods
@@ -46,9 +50,16 @@ glm::mat4x4 DRB;
  */
 void Sample(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
 {
-    std::cout << "Sample(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    // std::cout << "Sample(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    float d = 1.0f / N;
+    for (int n = 0; n < N; n++) {
+        for (int i = 0; i <= 1; i++) {
+            float t = (n+i) * d;
+            glm::vec4 T(pow(t, 3), pow(t, 2), t, 1.0f);
+            Vertices.push_back(G * BasisMatrix * T);
+        }
+    }
 }
-
 
 /**
  * Samples a Bezier curve using Forward Differences
@@ -58,7 +69,25 @@ void Sample(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
  */
 void SampleFWD(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
 {
-    std::cout << "SampleFWD(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    // std::cout << "SampleFWD(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    float d = 1.0f / N;
+    glm::vec4 T(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 dT(pow(d, 3), pow(d, 2), d, 0.0f);
+    glm::vec4 d2T(6.0f * pow(d, 3), 2.0f * pow(d, 2), 0.0f, 0.0f);
+    glm::vec4 d3T(6.0f * pow(d, 3), 0.0f, 0.0f, 0.0f);
+
+    glm::vec3 P = G * BasisMatrix * T;
+    glm::vec3 dP = G * BasisMatrix * dT;
+    glm::vec3 d2P = G * BasisMatrix * d2T;
+    glm::vec3 d3P = G * BasisMatrix * d3T;
+
+    for (int i = 0; i < N; i++) {
+        Vertices.push_back(P);
+        P += dP;
+        dP += d2P;
+        d2P += d3P;
+        Vertices.push_back(P);
+    }
 }
 
 /**
@@ -69,7 +98,18 @@ void SampleFWD(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
  */
 void SubDivide(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
 {
-    std::cout << "SubDivide(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    // std::cout << "SubDivide(BezierRow&, int, std::vector<glm::vec3>&): Not implemented yet!" << std::endl;
+    if (N <= 0) {
+        Vertices.push_back(G[1]);
+        Vertices.push_back(G[4]);
+        return;
+    }
+
+    BezierRow left = G * DLB;
+    BezierRow right = G * DRB;
+
+    SubDivide(left, N - 1, Vertices);
+    SubDivide(right, N - 1, Vertices);
 }
 
 /**
@@ -79,9 +119,18 @@ void SubDivide(BezierRow const& G, int N, std::vector<glm::vec3>& Vertices)
  */
 bool Flatness(BezierRow const& G, float epsilon)
 {
-   std::cout << "Flatness(BezierRow&, float): Not implemented yet!" << std::endl;
+    // std::cout << "Flatness(BezierRow&, float): Not implemented yet!" << std::endl;
  
-    return true;
+    // return true;
+
+    glm::vec3 ln = glm::normalize(G[4] - G[1]);
+    float d2 = glm::l2Norm((G[2]-G[1]) - ((G[2]-G[1]) * ln) * ln);
+    float d3 = glm::l2Norm((G[3]-G[1]) - ((G[3]-G[1]) * ln) * ln);
+    float maxDist = std::max(d2, d3);
+    // std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    // bool b = maxDist <= epsilon;
+    // std::cout << "Time:" << time << "\nBool:" << b << std::endl;
+    return maxDist <= epsilon;
 }
 
 /**
@@ -93,7 +142,19 @@ bool Flatness(BezierRow const& G, float epsilon)
  */
 void SubDivide(BezierRow const& G, float epsilon, std::vector<glm::vec3>& Vertices, int N)
 {
-    std::cout << "SubDivide(BezierRow&, float, std::vector<glm::vec3>&, int): Not implemented yet!" << std::endl;
+    // std::cout << "SubDivide(BezierRow&, float, std::vector<glm::vec3>&, int): Not implemented yet!" << std::endl;
+
+    if ((N <= 0) || (Flatness(G, epsilon))) {
+        Vertices.push_back(G[1]);
+        Vertices.push_back(G[4]);
+        return;
+    }
+    
+    BezierRow left = G * DLB;
+    BezierRow right = G * DRB;
+
+    SubDivide(left, epsilon, Vertices, N - 1);
+    SubDivide(right, epsilon, Vertices, N - 1);
 }
 
 /**

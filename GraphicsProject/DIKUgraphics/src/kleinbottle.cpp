@@ -110,7 +110,8 @@ glm::vec3 KleinBottom::Normal(float u, float v) const
  * The parameters can be changed by calling member functions of the parent class ParametricSurface.
  */
 KleinHandle::KleinHandle()
-           : ParametricSurface(0.0f, 2.0f * glm::pi<float>(), 20, 0.0f, glm::pi<float>(), 20, true, false)
+        //    : ParametricSurface(0.0f, 2.0f * glm::pi<float>(), 20, 0.0f, glm::pi<float>(), 20, true, false)
+           : ParametricSurface(0.0f, 2.0f * glm::pi<float>(), 20, 0.0f, glm::pi<float>(), 20, false, false)
 {}
 
 /*

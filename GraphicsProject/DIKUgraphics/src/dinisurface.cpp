@@ -13,8 +13,10 @@
  * Default constructor creates a DiniSurface with some default parameters.
  */
 DiniSurface::DiniSurface()
-           : ParametricSurface(0.0f, 6.0f * glm::pi<float>(), 100, 0.01f, 2.0f, 20, false, false),
-             a(1.0f), b(0.2f)
+            // : ParametricSurface(0.0f, 6.0f * glm::pi<float>(), 100, 0.01f, 2.0f, 20, false, false),
+            // a(1.0f), b(0.2f)
+            : ParametricSurface(0.0f, 6.0f * glm::pi<float>(), 100, 0.01f, 2.0f, 100, true, false),
+                a(1.0f), b(0.2f)
 {}
 
 /*

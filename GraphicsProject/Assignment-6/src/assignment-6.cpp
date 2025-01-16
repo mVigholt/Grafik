@@ -422,7 +422,8 @@ int main()
     
 
         ++CurrentSurface;
-            DiniSurface dinisurface;
+        DiniSurface dinisurface;
+        dinisurface.FrontFacing(false);
         NVertices[CurrentSurface] = dinisurface.Vertices().size();
 
         // Vieving parameters

@@ -84,6 +84,8 @@ bool BezierSurface::FrontFacing() const
 void BezierSurface::FrontFacing(bool frontfacing)
 {
     this->frontfacing = frontfacing;
+    this->VerticesOK            = false;
+    this->NormalsOK             = false;
 }
 
 /*
@@ -391,7 +393,63 @@ void BezierSurface::PrintIndexMatrix(int PatchNumber,
  */
 void BezierSurface::subdivide_bezierpatch(BezierPatch const& G, int level)
 {
-    std::cout << "BezierSurface::subdivide_bezierpatch(BezierPatch&, int): Not implemented yet!" << std::endl;
+    // std::cout << "BezierSurface::subdivide_bezierpatch(BezierPatch&, int): Not implemented yet!" << std::endl;
+
+    if (level == 0) {
+        // Add the four corner points to the vertices
+        glm::vec3 V1 = G[1][1];
+        glm::vec3 V2 = G[4][1];
+        glm::vec3 V3 = G[4][4];
+        glm::vec3 V4 = G[1][4];
+
+        //glm::normalize()? - No
+        glm::vec3 N1 = glm::cross(G[2][1]-G[1][1], G[1][2]-G[1][1]); 
+        glm::vec3 N2 = glm::cross(G[4][2]-G[4][1], G[3][1]-G[4][1]);
+        glm::vec3 N3 = glm::cross(G[3][4]-G[4][4], G[4][3]-G[4][4]); 
+        glm::vec3 N4 = glm::cross(G[1][3]-G[1][4], G[2][4]-G[1][4]);
+        
+        if (this->frontfacing) {
+            vertices.push_back(V1);
+            normals.push_back(N1);
+            vertices.push_back(V3);
+            normals.push_back(N3);
+            vertices.push_back(V4);
+            normals.push_back(N4);
+
+            vertices.push_back(V3);
+            normals.push_back(N3);
+            vertices.push_back(V1);
+            normals.push_back(N1);
+            vertices.push_back(V2);
+            normals.push_back(N2);
+        } else {
+            vertices.push_back(V1);
+            normals.push_back(-N1);
+            vertices.push_back(V4);
+            normals.push_back(-N4);
+            vertices.push_back(V3);
+            normals.push_back(-N3);
+
+            vertices.push_back(V3);
+            normals.push_back(-N3);
+            vertices.push_back(V2);
+            normals.push_back(-N2);
+            vertices.push_back(V1);
+            normals.push_back(-N1);
+        }
+
+        return;
+    }
+
+    BezierPatch G11 = glm::transpose(DBL) * G * DBL;
+    BezierPatch G12 = glm::transpose(DBR) * G * DBL;
+    BezierPatch G21 = glm::transpose(DBL) * G * DBR;
+    BezierPatch G22 = glm::transpose(DBR) * G * DBR;
+    // Recursively subdivide each sub-patch
+    subdivide_bezierpatch(G11, level - 1);
+    subdivide_bezierpatch(G12, level - 1);
+    subdivide_bezierpatch(G21, level - 1);
+    subdivide_bezierpatch(G22, level - 1);
 }
 
 /*
